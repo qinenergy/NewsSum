@@ -21,7 +21,7 @@ def print_article(article):
 	if article!=-1:
 		print("==========="+article.title+"==========")
 		print(article.text)
-		print("======================================")
+		print("\n\n")
 
 
 def decode_g_result(g):
