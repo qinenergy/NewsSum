@@ -6,6 +6,7 @@ import numpy as np
 import sys
 import argparse
 import gnp
+from sumbasic import sum_basic
 from newspaper import Article
 
 
@@ -35,7 +36,7 @@ def decode_g_result(g):
 	print_article(s0)
 	print_article(s1)
 	print_article(s2)
-	return s0, s1, s2
+	return [s0.text]+[s1.text]+[s2.text]
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -46,4 +47,7 @@ if __name__ == "__main__":
 		print('Please input a query using --query "Something to search"')
 		sys.exit()
 	g_result = gnp.get_google_news_query(args.query)
-	decode_g_result(g_result)
+	text = decode_g_result(g_result)
+	summary = sum_basic(text, 150)
+	print("=======Summary========")
+	print(summary)
