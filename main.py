@@ -45,5 +45,5 @@ if __name__ == "__main__":
 	if args.query == None:
 		print('Please input a query using --query "Something to search"')
 		sys.exit()
-	g_result = gnp.get_google_news_query("What's happening on earth")
+	g_result = gnp.get_google_news_query(args.query)
 	decode_g_result(g_result)
