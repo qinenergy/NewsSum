@@ -9,6 +9,8 @@ import numpy as np
 import tensorflow as tf
 
 from data_reader import load_data, DataReader
+from sklearn.metrics import precision_recall_fscore_support as score
+from wiki_news import wikinews_reader
 
 def conv2d(input_, output_dim, k_h, k_w, name="conv2d"):
     with tf.variable_scope(name):
@@ -218,13 +220,13 @@ class Trainer(object):
                 print("at the end of epoch:", epoch)
                 print("train loss = %6.8f, perplexity = %6.8f" % (avg_cost, np.exp(avg_cost)))
                 print("validation loss = %6.8f, perplexity = %6.8f" % (val_loss, np.exp(val_loss)))
-                save_message = ""
                 # Save the model if it achieved better result on val
                 if min_val_loss==None or val_loss<min_val_loss:
                     model_path = saver.save(sess, "./model.ckpt")
-                    min_val_loss = mval_loss
+                    min_val_loss = val_loss
                     last_improve_ep = epoch
-                    save_message = ", Model saved!".format(model_path)               
+                    save_message = ", Model saved!".format(model_path)  
+                    print(save_message)             
                 # Early termination if no improvement is found for x epochs.
                 if epoch - last_improve_ep > 10:
                     print("No improvement during the past {} epochs, stopping optimization".format(last_improve_ep))
@@ -241,17 +243,56 @@ class Trainer(object):
             elapsed_time_message = "Total training time: {:.3f} sec".format(elapsed_time)
             print(elapsed_time_message)
    
-    def test(self, test_set):
+    def test(self, test_reader):
         saver = tf.train.Saver()
         with self._create_session() as sess:
-            output_file = "{}/group21.perplexity{}".format(self._args.result_dir, self._args.experiment)
-            f = open(output_file, "w")
             # Restore trained model
             saver.restore(sess, "./model.ckpt")
+            print("Model loaded")
+            # Predictions
+            batch_num = len(list(test_reader.iter()))
+            precision, recall, fscore = 0., 0., 0.
+            for x, y in test_reader.iter():
+                logits = sess.run([self.logits],{self.input: x})
+                logits = np.array(logits[0])
+                pred = np.argmax(np.transpose(logits, (1,0,2)), axis=2)
+                for i in range(self._batch_size):
+                    predi = [0 if e==2 else e for e in pred[i]]
+                    yi = [0 if e==2 else e for e in y[i]]
+                    precision_, recall_, fscore_, _ = score(predi, yi, labels=[0,1])
+                    precision += precision_[1]
+                    recall += recall_[1]
+                    fscore += fscore_[1]           
+            precision /= batch_num * self._batch_size
+            recall /= batch_num * self._batch_size
+            fscore /= batch_num * self._batch_size
+            print("precision:", precision, "recall:", recall, "fscore:", fscore)
+    def gen(self, wr):
+        saver = tf.train.Saver()
+        with self._create_session() as sess:
+            # Restore trained model
+            saver.restore(sess, "./model.ckpt")
+            print("Model loaded")
+            # Summary files
+            save_file = open("./summary/summary.txt", "w")
+            # Predictions
+            for i in range(wr.batch_num):
+                x, o, t = test_reader.next_batch()
+                logits = sess.run([self.logits],{self.input: x})
+                logits = np.array(logits[0])
+                pred = np.argmax(np.transpose(logits, (1,0,2)), axis=2)
+                for j in range(self._batch_size):
+                    summary = ""
+                    for k, label in enumerate(pred[j]):
+                        if label==1:
+                            summary += o[j][k] + " "
+                    save_file.write('=================================\n')
+                    save_file.write(t[j]+'\n')
+                    save_file.write(summary+ '\n\n')
+            save_file.close()
             
-        f.close()
-        print("Perplexity output written on {}".format(output_file))
 
+    
 
 if __name__ == "__main__":
     max_doc_length = 15
@@ -260,6 +301,12 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--restore', action='store_true', 
+                        help='restore model')
+    parser.add_argument('--train', action='store_true', 
+                        help='train model')
+    parser.add_argument('--eval', action='store_true', 
+                        help='restore model')
+    parser.add_argument('--generate', action='store_true', 
                         help='restore model')
     args = parser.parse_args()
 
@@ -278,9 +325,18 @@ if __name__ == "__main__":
                               batch_size)
 
     initializer = tf.random_uniform_initializer(-0.05, 0.05)
-    trainer = Trainer(initializer, word_vocab, embedding_path)
+    trainer = Trainer(initializer, word_vocab, embedding_path,
+                      max_doc_length = max_doc_length,
+                      max_sen_length = max_sen_length,
+                      batch_size = batch_size)
     print("Trainer established")
-
-
-    trainer.train(train_reader, valid_reader, args.restore)
+    if args.train:
+        trainer.train(train_reader, valid_reader, args.restore)
+    if args.eval:
+        print("Evaluating")
+        trainer.test(test_reader)
+    if args.generate:
+        print("Testing on WikiNews")
+        wiki_reader = wikinews_reader(max_doc_length, max_sen_length, word_vocab, batch_size)
+        trainer.gen(wiki_reader)
     
