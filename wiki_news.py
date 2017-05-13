@@ -50,7 +50,7 @@ class wikinews_reader:
             left_num = self.batch_size - (self.N - self.pointer)
             w = np.concatenate([self.wiki_tensors[-1:]]*left_num, axis=0)
             w = np.concatenate([self.wiki_tensors[self.pointer:], w], axis=0)
-            o = self.ori[self.pointer:] + sself.ori[-1:]*left_num
+            o = self.ori[self.pointer:] + self.ori[-1:]*left_num
             t = self.titles[self.pointer:] + self.titles[-1:]*left_num
             return w, o, t
 
