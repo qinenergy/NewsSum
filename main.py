@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import numpy as np
 import sys
-import argparse
 import gnp
 from sumbasic import sum_basic
 from newspaper import Article
@@ -18,36 +17,34 @@ def get_article(url):
 	article.parse()
 	return article
 
-def print_article(article):
-	if article!=-1:
-		print("==========="+article.title+"==========")
-		print(article.text)
-		print("\n\n")
-
-
-def decode_g_result(g):
-	print("Timestamp: "+g["meta"]["timestamp"])
-	if len(g["stories"])<3:
-		print("Not enough stories found.")
-		sys.exit()
-	s0 = get_article(g["stories"][0]["link"])
-	s1 = get_article(g["stories"][1]["link"])
-	s2 = get_article(g["stories"][2]["link"])
-	print_article(s0)
-	print_article(s1)
-	print_article(s2)
-	return [s0.text]+[s1.text]+[s2.text]
+def decode_g_result(title):
+	g = gnp.get_google_news_query(title)
+	try:
+		s0 = get_article(g["stories"][0]["link"]).text
+	except:
+		s0 = "Not enough article found under title" + title
+	try:
+		s1 = get_article(g["stories"][1]["link"]).text
+	except:
+		s0 = "Not enough article found under title" + title
+	return [s0]+[s1]
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-	parser.add_argument('--query', type=str, default=None, 
-						help='news query')
-	args = parser.parse_args()
-	if args.query == None:
-		print('Please input a query using --query "Something to search"')
-		sys.exit()
-	g_result = gnp.get_google_news_query(args.query)
-	text = decode_g_result(g_result)
-	summary = sum_basic(text, 150)
-	print("=======Summary========")
-	print(summary)
+	num = 2
+	b = gnp.get_google_news(gnp.EDITION_ENGLISH_US)
+	stories = [b["stories"][i]["title"].decode().replace("...", "") for i in range(2)]
+	urls = [b["stories"][i]["link"].decode() for i in range(2)]
+	crawled = []
+	summary_basic = []
+	for i in range(2):
+		crawled.append(decode_g_result(stories[i]))
+	for i in range(2):
+		summary_basic.append(sum_basic(crawled[i], 150))
+	
+	html = ""
+	for i in range(2):
+		html += '<a href="'+urls[i]+'">'+stories[i]+'</a>\n'
+		html += '<p>'+summary_basic[i]+'</p>\n'
+
+	with open("index.html", "w") as file:
+		print(html, file=file)
