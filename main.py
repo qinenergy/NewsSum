@@ -30,21 +30,23 @@ def decode_g_result(title):
 	return [s0]+[s1]
 
 if __name__ == "__main__":
-	num = 2
+	num = 20
 	b = gnp.get_google_news(gnp.EDITION_ENGLISH_US)
-	stories = [b["stories"][i]["title"].decode().replace("...", "") for i in range(2)]
-	urls = [b["stories"][i]["link"].decode() for i in range(2)]
+	stories = [b["stories"][i]["title"].decode().replace("...", "") for i in range(num)]
+	urls = [b["stories"][i]["link"].decode() for i in range(num)]
 	crawled = []
 	summary_basic = []
-	for i in range(2):
+	for i in range(num):
 		crawled.append(decode_g_result(stories[i]))
-	for i in range(2):
+	for i in range(num):
 		summary_basic.append(sum_basic(crawled[i], 150))
 	
 	html = ""
-	for i in range(2):
-		html += '<a href="'+urls[i]+'">'+stories[i]+'</a>\n'
+	for i in range(num):
+		html += '<h1><a href="'+urls[i]+'">'+stories[i]+'</a></h1>\n'
+		html += '<h2>SumBasic Method</h2>\n'
 		html += '<p>'+summary_basic[i]+'</p>\n'
+		html += '<h2>LSTM-based Method</h2>\n'
 
-	with open("index.html", "w") as file:
+	with open("./docs/index.html", "w") as file:
 		print(html, file=file)
