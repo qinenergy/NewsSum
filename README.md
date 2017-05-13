@@ -1,6 +1,9 @@
 # wiki_news
 
-A news summarization tool.
+A news summarization tool. Collects google news topics, crawl related news articles, generate summaries.
+
+## Run
+python3 main.py
 
 ## Demo
 
