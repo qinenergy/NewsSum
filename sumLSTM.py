@@ -10,7 +10,9 @@ import tensorflow as tf
 
 from data_reader import load_data, DataReader
 from sklearn.metrics import precision_recall_fscore_support as score
-from wiki_news import wikinews_reader
+from reader import wikinews_reader
+
+
 
 def conv2d(input_, output_dim, k_h, k_w, name="conv2d"):
     with tf.variable_scope(name):
@@ -114,7 +116,7 @@ class Trainer(object):
     def _model(self):
         with tf.variable_scope("Model", initializer=self._initializer):
             # Input sentence [Batch_size, timestep]
-            pretrained_emb = load_wordvec(self._embedding_path, word_vocab, self._word_embed_size)
+            pretrained_emb = load_wordvec(self._embedding_path, self._word_vocab, self._word_embed_size)
             self.input = tf.placeholder(tf.int32, shape=[self._batch_size, self._max_doc_length, self._max_sen_length], name="input")
             word_embedding = tf.get_variable(name='word_embedding4', shape=[self._word_vocab.size, self._word_embed_size], 
                                        initializer=tf.constant_initializer(pretrained_emb))
@@ -277,7 +279,7 @@ class Trainer(object):
             save_file = open("./summary/summary.txt", "w")
             # Predictions
             for i in range(wr.batch_num):
-                x, o, t = test_reader.next_batch()
+                x, o, t = wr.next_batch()
                 logits = sess.run([self.logits],{self.input: x})
                 logits = np.array(logits[0])
                 pred = np.argmax(np.transpose(logits, (1,0,2)), axis=2)
@@ -312,17 +314,24 @@ if __name__ == "__main__":
 
     embedding_path = "./data/wordembeddings-dim100.word2vec"
 
-    word_vocab, word_tensors, max_doc_length, label_tensors = \
-        load_data('data/', max_doc_length, max_sen_length)
+    if args.train or args.test:
+        word_vocab, word_tensors, max_doc_length, label_tensors = \
+            load_data('data/', max_doc_length, max_sen_length)
 
-    train_reader = DataReader(word_tensors['train'], label_tensors['train'],
-                              batch_size)
+        train_reader = DataReader(word_tensors['train'], label_tensors['train'],
+                                  batch_size)
 
-    valid_reader = DataReader(word_tensors['valid'], label_tensors['valid'],
-                              batch_size)
+        valid_reader = DataReader(word_tensors['valid'], label_tensors['valid'],
+                                  batch_size)
 
-    test_reader = DataReader(word_tensors['test'], label_tensors['test'],
-                              batch_size)
+        test_reader = DataReader(word_tensors['test'], label_tensors['test'],
+                                  batch_size)
+    else:
+        try:
+            with open('./data/word_vocab.pkl', 'rb') as input:
+                word_vocab = pickle.load(input)
+        except:
+            pass
 
     initializer = tf.random_uniform_initializer(-0.05, 0.05)
     trainer = Trainer(initializer, word_vocab, embedding_path,
