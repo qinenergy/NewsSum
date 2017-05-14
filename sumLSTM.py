@@ -7,6 +7,7 @@ import time
 import argparse
 import numpy as np
 import tensorflow as tf
+import pickle
  
 from sklearn.metrics import precision_recall_fscore_support as score
 from reader import wikinews_reader, load_data, DataReader
@@ -325,10 +326,12 @@ if __name__ == "__main__":
 
         test_reader = DataReader(word_tensors['test'], label_tensors['test'],
                                   batch_size)
+        with open('./data/word_vocab.pkl', 'wb') as output:
+            pickle.dump(word_vocab, output, pickle.HIGHEST_PROTOCOL)
     else:
         try:
-            with open('./data/word_vocab.pkl', 'rb') as input:
-                word_vocab = pickle.load(input)
+            with open('./data/word_vocab.pkl', 'rb') as ipt:
+                word_vocab = pickle.load(ipt)
         except:
             pass
 
