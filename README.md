@@ -1,4 +1,4 @@
-# wiki_news
+# NewsSum
 
 A news summarization tool. Collects google news topics, crawl related news articles, generate summaries.
 
