@@ -1,6 +1,6 @@
 # NewsSum
 
-A news summarization tool. Collects google news topics, crawl related news articles, generate summaries.
+A news summarization tool. Collect google news topics, crawl related news articles, generate summaries.
 
 ## Run
 python3 main.py
