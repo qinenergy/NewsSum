@@ -32,3 +32,6 @@ Newspaper
 [GNP](https://github.com/mPAND/gnp)
 
 [NeuralSum](https://github.com/cheng6076/NeuralSum)
+
+## License
+MIT
