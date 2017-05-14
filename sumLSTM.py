@@ -7,10 +7,9 @@ import time
 import argparse
 import numpy as np
 import tensorflow as tf
-
-from data_reader import load_data, DataReader
+ 
 from sklearn.metrics import precision_recall_fscore_support as score
-from reader import wikinews_reader
+from reader import wikinews_reader, load_data, DataReader
 
 
 
