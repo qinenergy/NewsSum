@@ -27,11 +27,12 @@ Tensorflow
 
 Newspaper
 
-## Acknowledge
+## Acknowledgement
 
-[GNP](https://github.com/mPAND/gnp)
+[GNP](https://github.com/mPAND/gnp) 
 
 [NeuralSum](https://github.com/cheng6076/NeuralSum)
+For their dataset and dataset reader.
 
 ## License
 MIT
