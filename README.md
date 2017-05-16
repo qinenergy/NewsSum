@@ -32,7 +32,7 @@ Newspaper
 [GNP](https://github.com/mPAND/gnp) 
 
 [NeuralSum](https://github.com/cheng6076/NeuralSum)
-For their dataset and dataset reader.
+For their dataset and dataset reader and LSTM architecture.
 
 ## License
 MIT
