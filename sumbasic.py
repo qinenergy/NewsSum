@@ -1,19 +1,11 @@
 import nltk
-from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
 
-import itertools
 from functools import reduce
 from operator import itemgetter
+from utils import preprocess, flatten
+import itertools
 
-stop_words = set(stopwords.words('english'))
-
-def preprocess(tokens):
-    l_tokens = [t.lower() for t in tokens]
-    return [t for t in l_tokens if t not in stop_words]
-
-def flatten(l):
-    return list(itertools.chain.from_iterable(l))
 
 def probability_distribution(tokens):
     N, distinct_w = len(tokens), set(tokens)      
