@@ -1,6 +1,10 @@
 # NewsSum
 
-A news summarization tool. Collect google news topics, crawl related news articles, generate summaries.
+A neural news summarization tool. Collect google news topics, crawl related news articles, generate summaries.
+Including the following units:
+1. BasicSum: traditional freq-based news-summary generator.
+2. LSTM-Attetion: Neural network model that summarizes news.
+3. WikiNews Dataset: A list of news articles crawled from WikiNews, every element(event) of the list contains at least three articles from mainstream website talking about the event.
 
 ## Run
 python3 main.py
